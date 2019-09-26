@@ -1,0 +1,18 @@
+
+# Common routes
+GET         /healthz                                controllers.common.HealthzController.healthz
+
+# Ton api routes
+POST        /ton/v1/createNewKey                    controllers.io.broxus.ton.TonApiController.createNewKey
+
+POST        /ton/v1/accountAddress                  controllers.io.broxus.ton.TonApiController.accountAddress
+
+POST        /ton/v1/accountStatus                   controllers.io.broxus.ton.TonApiController.accountStatus
+
+POST        /ton/v1/importKey                       controllers.io.broxus.ton.TonApiController.importKey
+
+POST        /ton/v1/sendGrams                       controllers.io.broxus.ton.TonApiController.sendGrams
+
+POST        /ton/v1/initAccount                     controllers.io.broxus.ton.TonApiController.initAccount
+
+POST        /ton/v1/transactionHistory              controllers.io.broxus.ton.TonApiController.transactionHistory
