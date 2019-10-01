@@ -43,19 +43,25 @@ class TonApiController @Inject()(controllerComponents: ControllerComponents,
             case AccountAddressTypes.TestWallet =>
                 client.send(new TonApi.TestWalletGetAccountAddress(new TonApi.TestWalletInitialAccountState(
                     r.body.publicKey
-                ))).map { case address: TonApi.AccountAddress =>
-                    Ok(Json.toJson(AccountAddressResponse(
-                        address = address.accountAddress
-                    )))
+                ))).flatMap { case address: TonApi.AccountAddress =>
+                    client.send(new TonApi.UnpackAccountAddress(address.accountAddress)).map { case unpacked: TonApi.UnpackedAccountAddress =>
+                        Ok(Json.toJson(AccountAddressResponse(
+                            address = address.accountAddress,
+                            unpacked = UnpackedAccountAddress(unpacked)
+                        )))
+                    }
                 }
 
             case AccountAddressTypes.Wallet =>
                 client.send(new TonApi.WalletGetAccountAddress(new TonApi.WalletInitialAccountState(
                     r.body.publicKey
-                ))).map { case address: TonApi.AccountAddress =>
-                    Ok(Json.toJson(AccountAddressResponse(
-                        address = address.accountAddress
-                    )))
+                ))).flatMap { case address: TonApi.AccountAddress =>
+                    client.send(new TonApi.UnpackAccountAddress(address.accountAddress)).map { case unpacked: TonApi.UnpackedAccountAddress =>
+                        Ok(Json.toJson(AccountAddressResponse(
+                            address = address.accountAddress,
+                            unpacked = UnpackedAccountAddress(unpacked)
+                        )))
+                    }
                 }
 
             case other => Future.successful(BadRequest)
@@ -307,7 +313,26 @@ object AccountAddressRequest {
     implicit val format: Format[AccountAddressRequest] = Json.format[AccountAddressRequest]
 }
 
-case class AccountAddressResponse(address: String)
+case class UnpackedAccountAddress(address: String,
+                                  workchainId: Int,
+                                  bounceable: Boolean,
+                                  testnet: Boolean)
+
+object UnpackedAccountAddress {
+
+    def apply(unpacked: TonApi.UnpackedAccountAddress): UnpackedAccountAddress =
+        new UnpackedAccountAddress(
+            address = AccountTransaction.convertBytesToHex(unpacked.addr),
+            workchainId = unpacked.workchainId,
+            bounceable = unpacked.bounceable,
+            testnet = unpacked.testnet
+        )
+
+    implicit val format: Format[UnpackedAccountAddress] = Json.format[UnpackedAccountAddress]
+}
+
+case class AccountAddressResponse(address: String,
+                                  unpacked: UnpackedAccountAddress)
 
 object AccountAddressResponse {
 

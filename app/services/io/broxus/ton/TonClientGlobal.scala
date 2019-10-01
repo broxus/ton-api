@@ -72,9 +72,13 @@ class TonClientGlobal @Inject()(config: TonClientConfig, lifecycle: ApplicationL
 
         Await.result(send(new TonApi.Init(
             new TonApi.Options(
-                config.liteClient,
-                config.keystore,
-                config.useNetworkCallback
+                new TonApi.Config(
+                    config.liteClient,
+                    "",
+                    config.useNetworkCallback,
+                    false
+                ),
+                new TonApi.KeyStoreTypeDirectory(config.keystore)
             )
         )), 30.seconds) match {
 
