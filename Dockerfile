@@ -5,9 +5,6 @@ FROM openjdk:8-jdk-slim as builder
 ENV SCALA_VERSION 2.12.8
 ENV SBT_VERSION 1.2.8
 
-#ENV SBT_CREDENTIALS "/root/.sbt/.credentials"
-#ENV SBT_OPTS "-Dsbt.override.build.repos=true -Dsbt.boot.credentials=/root/.sbt/.credentials"
-
 WORKDIR /build
 
 # Install sbt
@@ -36,20 +33,24 @@ RUN sbt -mem 2048 stage
 # Runtime
 FROM openjdk:8-jre-slim
 
+# Create a non root user for runtime
 RUN addgroup jvm && \
     adduser --system --disabled-login --shell /bin/false --home=/app jvm && \
     adduser jvm jvm && chown jvm:jvm -R /app
 
 WORKDIR /app
 
+# Copy pre-build api to runtime container
 COPY --from=builder /build/target/universal/stage ./
 
 RUN chmod 755 -R /app/bin
 
 USER jvm
 
+# Create keystore directory
 RUN mkdir /app/keystore
 
 EXPOSE 9000
 
+# Default play application entrypoint
 ENTRYPOINT [ "bin/ton-api", "-Dpidfile.path=/dev/null", "-Dfile.encoding=UTF8" ]
