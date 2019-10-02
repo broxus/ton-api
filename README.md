@@ -1,7 +1,7 @@
-# TON Client
+# TON API
 
 ## Overview
-This is a simple http api for telegram open network client. Base on original [native-lib.cpp](https://github.com/ton-blockchain/ton/blob/master/example/android/native-lib.cpp), [Play Framework](https://github.com/playframework/playframework) and [TON client java wrapper](https://github.com/broxus/ton-client).
+This is a simple wallet http api for telegram open network client. Base on original [native-lib.cpp](https://github.com/ton-blockchain/ton/blob/master/example/android/native-lib.cpp), [Play Framework](https://github.com/playframework/playframework) and [TON client java wrapper](https://github.com/broxus/ton-client).
 
 ## Supported OS
 
@@ -81,7 +81,7 @@ ton {
 Examples
 ----
 
-Create new key
+<b>Create new key</b>
 
 ```bash
 curl -X POST -H "Content-Type: application/json" -d '{}' http://localhost:9000/ton/v1/createNewKey
@@ -97,7 +97,7 @@ curl -X POST -H "Content-Type: application/json" -d '{}' http://localhost:9000/t
 
 <br>
 
-Request account address (account types supported: wallet and testWallet)
+<b>Request account address</b> (account types supported: wallet and testWallet)
 
 ```bash
 curl -X POST -H "Content-Type: application/json" -d '{"publicKey":"PuZSaVYlFFB6Or92_EmNwgm2t4pem62k9s3WDuC9H3QeF1Ue", "accountType": "testWallet"}' http://localhost:9000/ton/v1/accountAddress
@@ -117,7 +117,7 @@ curl -X POST -H "Content-Type: application/json" -d '{"publicKey":"PuZSaVYlFFB6O
 
 <br>
 
-Request account status (balance, last transaction, seqno and state)
+<b>Request account status</b> (balance, last transaction, seqno and state)
 
 ```bash
 curl -X POST -H "Content-Type: application/json" -d '{"address": "EQALQWtEElfqoIP2ftiiugUmQ5J4JDERedFLyvXhjHGJK2xl"}' http://localhost:9000/ton/v1/accountStatus
@@ -137,7 +137,7 @@ curl -X POST -H "Content-Type: application/json" -d '{"address": "EQALQWtEElfqoI
 
 <br>
 
-Init account (create wallet, account types supported: wallet and testWallet)
+<b>Init account</b> (create wallet, account types supported: wallet and testWallet)
 
 ```bash
 curl -X POST -H "Content-Type: application/json" -d '{"accountKey": {"publicKey":"PuZSaVYlFFB6Or92_EmNwgm2t4pem62k9s3WDuC9H3QeF1Ue","password":"o+rEXFnd9dDrEiYza5qVIhyX40W2I96KA1ojUZC6YJs="}, "accountType": "testWallet"}' http://localhost:9000/ton/v1/initAccount
@@ -149,7 +149,7 @@ curl -X POST -H "Content-Type: application/json" -d '{"accountKey": {"publicKey"
 
 <br>
 
-Send grams
+<b>Send grams</b>
 
 ```bash
 curl -X POST -H "Content-Type: application/json" -d '{ "sourceKey": {"publicKey":"PuZSaVYlFFB6Or92_EmNwgm2t4pem62k9s3WDuC9H3QeF1Ue","password":"o+rEXFnd9dDrEiYza5qVIhyX40W2I96KA1ojUZC6YJs="}, "sourceAccountType": "testWallet", "sourceSequence": 1, "destinationAddress": "EQDVdEsJ6mgOaYToip2Q_xBdnCHDxj0Ypqt3oPCU-Hmv1kX4", "amount": 1000000000 }' http://localhost:9000/ton/v1/sendGrams
@@ -161,7 +161,7 @@ curl -X POST -H "Content-Type: application/json" -d '{ "sourceKey": {"publicKey"
 
 <br>
 
-Import key
+<b>Import key</b>
 
 ```bash
 curl -X POST -H "Content-Type: application/json" -d '{ "seed": "seed":["assist","crunch","parade","entry","cost","random","pizza","organ","maximum","beauty","wait","tent","buyer","mom","erosion","media","reward","barely","fitness","skill","pave","zoo","sight","moral"] }' http://localhost:9000/ton/v1/importKey
@@ -176,7 +176,7 @@ curl -X POST -H "Content-Type: application/json" -d '{ "seed": "seed":["assist",
 
 <br>
 
-Transaction history
+<b>Transaction history</b>
 
 ```bash
 curl -X POST -H "Content-Type: application/json" -d '{ "address": "EQALQWtEElfqoIP2ftiiugUmQ5J4JDERedFLyvXhjHGJK2xl", "lastTransaction":{"hash":"0000000000000000000000000000000000000000000000000000000000000000","lt":0}, "withData": false }' http://localhost:9000/ton/v1/transactionHistory
