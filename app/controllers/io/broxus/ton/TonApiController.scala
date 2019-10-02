@@ -167,7 +167,7 @@ class TonApiController @Inject()(controllerComponents: ControllerComponents,
                         gramRequest.sourceSequence,
                         gramRequest.amount,
                         null
-                    )).map { case _: TonApi.Ok =>
+                    )).map { case _: TonApi.SendGramsResult =>
                         Ok(Json.toJson(SendGramResponse("OK")))
                     }
                 } getOrElse {
@@ -189,7 +189,7 @@ class TonApiController @Inject()(controllerComponents: ControllerComponents,
                         System.currentTimeMillis() / 1000L + 5L * 3600L,
                         gramRequest.amount,
                         null
-                    )).map { case _: TonApi.Ok =>
+                    )).map { case _: TonApi.SendGramsResult =>
                         Ok(Json.toJson(SendGramResponse("OK")))
                     }
                 } getOrElse {
