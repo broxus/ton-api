@@ -78,6 +78,10 @@ ton {
 }
 ```
 
+Swagger
+----
+Source swagger schema example can be accessible [here](public/swagger_ton_api.yaml). For interactive example run application using docker or sbt and open [http://localhost:9000/](http://localhost:9000)
+
 Examples
 ----
 

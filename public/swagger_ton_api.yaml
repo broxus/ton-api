@@ -1,0 +1,463 @@
+openapi: 3.0.0
+
+servers:
+  - url: '/ton/v1'
+
+info:
+  description: TON API server for wallets.
+  version: "1.0.0"
+  title: TON wallets API
+
+tags:
+  - name: Keys
+  - name: Accounts
+  - name: Transactions
+
+paths:
+
+  /createNewKey:
+    post:
+      summary: Creates new key pair and backup seed export
+      tags:
+        - Keys
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewKeyResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/Internal'
+
+  /importKey:
+    post:
+      summary: Import and restore key pair from seed
+      tags:
+        - Keys
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportKeyResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/Internal'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportKeyRequest'
+
+  /accountAddress:
+    post:
+      summary: Convert public key to account address
+      tags:
+        - Accounts
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountAddressResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/Internal'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountAddressRequest'
+
+  /accountStatus:
+    post:
+      summary: Request current account status
+      tags:
+        - Accounts
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountStatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/Internal'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountStatusRequest'
+
+  /initAccount:
+    post:
+      summary: Init account contract
+      tags:
+        - Accounts
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InitAccountResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/Internal'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitAccountRequest'
+
+  /transactionHistory:
+    post:
+      summary: Request account transactions history
+      tags:
+        - Accounts
+        - Transactions
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionHistoryResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/Internal'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionHistoryRequest'
+
+  /sendGrams:
+    post:
+      summary: Request account transactions history
+      tags:
+        - Accounts
+        - Transactions
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendGramsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/Internal'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendGramsRequest'
+
+components:
+
+  responses:
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            description: Error that comes with "404" status
+            properties:
+              code:
+                type: string
+                example: 404
+              description:
+                type: string
+                example: Not found
+
+    BadRequest:
+      description: Most likely malformed json (this includes violating schema in terms of required fields, but not validations)
+      content:
+        application/json:
+          schema:
+            type: object
+            description: Error that comes with "400" status
+            properties:
+              description:
+                type: string
+                example: Bad request
+
+    Unauthorized:
+      description: Unauthorized to perform action
+      content:
+        application/json:
+          schema:
+            type: object
+            description: Error that comes with "403" status
+            properties:
+              description:
+                type: string
+                example: Unauthorized
+    Internal:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            type: object
+            description: Error that comes with "500" status
+            properties:
+              description:
+                type: string
+                example: Internal server error
+
+  schemas:
+
+    AccountAddressTypes:
+      type: string
+      enum: [uninited, testwallet, wallet, giver]
+      description: Address type
+      example: "uninited"
+
+    AccountTransaction:
+      properties:
+        hash:
+          type: string
+          description: HEX representation of the transaction hash
+          example: "0000000000000000000000000000000000000000000000000000000000000000"
+        lt:
+          type: number
+          format: int64
+          example: 0
+      
+    TimeStamp:
+      type: integer
+      description: Unix timestamp.
+      example: 1552671060
+
+    NewKeyResponse:
+      properties:
+        publicKey:
+          type: string
+          description: Public key in base64 format
+          example: "PuZXCH4RP8BhqoP_5turqb_bkM0_D9ZtoFVQWNiWnJUnZB8I"
+        password:
+          type: string
+          description: Private key password in base64 fromat
+          example: "NOhHi4qiDQRHCBtH5jQHAtbJl9wfwFiOSikWq/3vh1o="
+        seed:
+          type: array
+          description: Backup seed for restoring key pair
+          example: ["pond", "accuse", "verify", "identify", "choice", "top", "winter", "give", "toward", "east", "wink", "grant", "better", "bike", "describe", "imitate", "february", "path", "fortune", "fitness", "planet", "stock", "velvet", "zoo"]
+          items:
+            type: string
+
+    ImportKeyRequest:
+      properties:
+        seed:
+          type: array
+          description: Backup seed for restoring key pair
+          example: ["pond", "accuse", "verify", "identify", "choice", "top", "winter", "give", "toward", "east", "wink", "grant", "better", "bike", "describe", "imitate", "february", "path", "fortune", "fitness", "planet", "stock", "velvet", "zoo"]
+          items:
+            type: string
+
+    ImportKeyResponse:
+      properties:
+        publicKey:
+          type: string
+          description: Public key in base64 format
+          example: "PuZXCH4RP8BhqoP_5turqb_bkM0_D9ZtoFVQWNiWnJUnZB8I"
+        password:
+          type: string
+          description: Private key password in base64 fromat
+          example: "NOhHi4qiDQRHCBtH5jQHAtbJl9wfwFiOSikWq/3vh1o="
+
+    AccountAddressRequest:
+      properties:
+        publicKey:
+          type: string
+          description: Public key in base64 format
+          example: "PuZXCH4RP8BhqoP_5turqb_bkM0_D9ZtoFVQWNiWnJUnZB8I"
+        accountType:
+          type: string
+          enum: ["wallet", "testWallet"]
+          description: Account contract type
+          exmaple: "wallet"
+
+    PackedAccountAddress:
+      type: string
+      description: Packed address format, base64 string representation
+      example: "EQCcBd-OFpftn9PJ_Tftjs2aI9zopuBo1neVUPenDaqR3jKK"
+
+    UnpackedAccountAddress:
+      properties:
+        address:
+          type: string
+          description: HEX representaion of packed address
+          example: "70BFBFBF1CD3B0041C449ACC5131926150235090582B5F627646941982C10A26"
+        workchainId:
+          type: integer
+          desciprion: Workchain index
+          exmaple: 0
+        bounceable:
+          type: boolean
+          description: Is address bounceable or not
+          example: true
+        testnet:
+          type: boolean
+          description: Is address in testnet or not
+          example: false
+
+    AccountAddressResponse:
+      properties:
+        address:
+          $ref: '#/components/schemas/PackedAccountAddress'
+        unpacked:
+          $ref: '#/components/schemas/UnpackedAccountAddress'
+
+    AccountStatusRequest:
+      properties:
+        address:
+          $ref: '#/components/schemas/PackedAccountAddress'
+
+    AccountStatusResponse:
+      properties:
+        balance:
+          type: number
+          format: int64
+          description: Account balance in nanograms
+          example: -1
+        timestamp:
+          $ref: '#/components/schemas/TimeStamp'
+        accountType:
+          $ref: '#/components/schemas/AccountAddressTypes'
+        lastTransaction:
+          $ref: '#/components/schemas/AccountTransaction'
+
+    InitAccountRequest:
+      properties:
+        accountKey:
+          properties:
+            publicKey:
+              type: string
+              description: Public key in base64 format
+              example: "PuZXCH4RP8BhqoP_5turqb_bkM0_D9ZtoFVQWNiWnJUnZB8I"
+            password:
+              type: string
+              description: Private key password in base64 fromat
+              example: "NOhHi4qiDQRHCBtH5jQHAtbJl9wfwFiOSikWq/3vh1o="
+        accountType:
+          type: string
+          enum: ["wallet", "testWallet"]
+          description: Account contract type
+          exmaple: "wallet"
+
+    InitAccountResponse:
+      properties:
+        status:
+          type: string
+          description: Command status
+          example: "OK"
+
+    TransactionHistory:
+      properties:
+        fee:
+          type: number
+          format: int64
+          description: Transaction fee
+          example: 0
+        timestamp:
+          $ref: "#/components/schemas/TimeStamp"
+        data:
+          type: string
+          description: Base64 encoded transaction binary data
+        transactionId:
+          $ref: '#/components/schemas/AccountTransaction'
+        inMessage:
+          $ref: '#/components/schemas/TransactionHistoryMessage'
+        outMessages:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionHistoryMessage'
+
+    TransactionHistoryMessage:
+      properties:
+        source:
+          $ref: '#/components/schemas/PackedAccountAddress'
+        destination:
+          $ref: '#/components/schemas/PackedAccountAddress'
+        message:
+          type: string
+          description: Base64 encoded message binary data
+        value:
+          type: number
+          format: int64
+          description: Message value in nanograms
+          example: 0
+
+    TransactionHistoryRequest:
+      properties:
+        address:
+          $ref: '#/components/schemas/PackedAccountAddress'
+        lastTransaction:
+          $ref: '#/components/schemas/AccountTransaction'
+        withData:
+          type: boolean
+          description: Request transactions/messages binary data
+          example: false
+
+    TransactionHistoryResponse:
+      properties:
+        previousTransaction:
+          $ref: '#/components/schemas/AccountTransaction'
+          description: Transaction for next request
+        transactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionHistory'
+
+    SendGramsRequest:
+      properties:
+        sourceAccountType:
+          type: string
+          enum: [ "wallet", "testWallet", "testGiver" ]
+          description: Source account type
+          example: "wallet"
+        sourceKey:
+          properties:
+            publicKey:
+              type: string
+              description: Public key in base64 format
+              example: "PuZXCH4RP8BhqoP_5turqb_bkM0_D9ZtoFVQWNiWnJUnZB8I"
+            password:
+              type: string
+              description: Private key password in base64 fromat
+              example: "NOhHi4qiDQRHCBtH5jQHAtbJl9wfwFiOSikWq/3vh1o="
+        sourceSequence:
+          type: integer
+          description: Source sequence number
+          example: 1
+        destinationAddress:
+          $ref: '#/components/schemas/PackedAccountAddress'
+          description: Target address
+        amount:
+          type: number
+          format: int64
+          description: Transaction amount in nanograms
+          example: 1000000000
+
+    SendGramsResponse:
+      properties:
+        status:
+          type: string
+          description: Command status
+          example: "OK"

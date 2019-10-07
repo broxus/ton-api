@@ -16,3 +16,8 @@ POST        /ton/v1/sendGrams                       controllers.io.broxus.ton.To
 POST        /ton/v1/initAccount                     controllers.io.broxus.ton.TonApiController.initAccount
 
 POST        /ton/v1/transactionHistory              controllers.io.broxus.ton.TonApiController.transactionHistory
+
+# Asset routes
+GET         /                                       controllers.Assets.at(path="/public", file="index.html")
+
+GET         /*file                                  controllers.Assets.at(path="/public", file)
