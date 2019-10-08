@@ -44,11 +44,19 @@ class TonApiController @Inject()(controllerComponents: ControllerComponents,
                 client.send(new TonApi.TestWalletGetAccountAddress(new TonApi.TestWalletInitialAccountState(
                     r.body.publicKey
                 ))).flatMap { case address: TonApi.AccountAddress =>
-                    client.send(new TonApi.UnpackAccountAddress(address.accountAddress)).map { case unpacked: TonApi.UnpackedAccountAddress =>
-                        Ok(Json.toJson(AccountAddressResponse(
-                            address = address.accountAddress,
-                            unpacked = UnpackedAccountAddress(unpacked)
-                        )))
+                    client.send(new TonApi.UnpackAccountAddress(address.accountAddress)).flatMap { case unpacked: TonApi.UnpackedAccountAddress =>
+                        client.send(new TonApi.PackAccountAddress(new TonApi.UnpackedAccountAddress(
+                            unpacked.workchainId,
+                            false,
+                            unpacked.testnet,
+                            unpacked.addr
+                        ))).map { case initAddress: TonApi.AccountAddress =>
+                            Ok(Json.toJson(AccountAddressResponse(
+                                address = address.accountAddress,
+                                initAddress = initAddress.accountAddress,
+                                unpacked = UnpackedAccountAddress(unpacked)
+                            )))
+                        }
                     }
                 }
 
@@ -56,11 +64,19 @@ class TonApiController @Inject()(controllerComponents: ControllerComponents,
                 client.send(new TonApi.WalletGetAccountAddress(new TonApi.WalletInitialAccountState(
                     r.body.publicKey
                 ))).flatMap { case address: TonApi.AccountAddress =>
-                    client.send(new TonApi.UnpackAccountAddress(address.accountAddress)).map { case unpacked: TonApi.UnpackedAccountAddress =>
-                        Ok(Json.toJson(AccountAddressResponse(
-                            address = address.accountAddress,
-                            unpacked = UnpackedAccountAddress(unpacked)
-                        )))
+                    client.send(new TonApi.UnpackAccountAddress(address.accountAddress)).flatMap { case unpacked: TonApi.UnpackedAccountAddress =>
+                        client.send(new TonApi.PackAccountAddress(new TonApi.UnpackedAccountAddress(
+                            unpacked.workchainId,
+                            false,
+                            unpacked.testnet,
+                            unpacked.addr
+                        ))).map { case initAddress: TonApi.AccountAddress =>
+                            Ok(Json.toJson(AccountAddressResponse(
+                                address = address.accountAddress,
+                                initAddress = initAddress.accountAddress,
+                                unpacked = UnpackedAccountAddress(unpacked)
+                            )))
+                        }
                     }
                 }
 
@@ -167,8 +183,11 @@ class TonApiController @Inject()(controllerComponents: ControllerComponents,
                         gramRequest.sourceSequence,
                         gramRequest.amount,
                         null
-                    )).map { case _: TonApi.SendGramsResult =>
-                        Ok(Json.toJson(SendGramResponse("OK")))
+                    )).map { case result: TonApi.SendGramsResult =>
+                        Ok(Json.toJson(SendGramResponse(
+                            hash = AccountTransaction.convertBytesToHex(result.bodyHash),
+                            sentUntil = result.sentUntil
+                        )))
                     }
                 } getOrElse {
                     Future.successful(BadRequest)
@@ -189,8 +208,11 @@ class TonApiController @Inject()(controllerComponents: ControllerComponents,
                         System.currentTimeMillis() / 1000L + 5L * 3600L,
                         gramRequest.amount,
                         null
-                    )).map { case _: TonApi.SendGramsResult =>
-                        Ok(Json.toJson(SendGramResponse("OK")))
+                    )).map { case result: TonApi.SendGramsResult =>
+                        Ok(Json.toJson(SendGramResponse(
+                            hash = AccountTransaction.convertBytesToHex(result.bodyHash),
+                            sentUntil = result.sentUntil
+                        )))
                     }
                 } getOrElse {
                     Future.successful(BadRequest)
@@ -202,8 +224,11 @@ class TonApiController @Inject()(controllerComponents: ControllerComponents,
                     gramRequest.sourceSequence,
                     gramRequest.amount,
                     null
-                )).map { case _: TonApi.Ok =>
-                    Ok(Json.toJson(SendGramResponse("OK")))
+                )).map { case result: TonApi.SendGramsResult =>
+                    Ok(Json.toJson(SendGramResponse(
+                        hash = AccountTransaction.convertBytesToHex(result.bodyHash),
+                        sentUntil = result.sentUntil
+                    )))
                 }
 
             case other => Future.successful(BadRequest)
@@ -257,6 +282,8 @@ class TonApiController @Inject()(controllerComponents: ControllerComponents,
             val historyTransactions = transactions.transactions.map { transaction =>
                 TransactionHistoryTransaction(
                     fee = transaction.fee,
+                    storageFee = transaction.storageFee,
+                    otherFee = transaction.otherFee,
                     timestamp = transaction.utime,
                     data = if(r.body.withData) { Option(transaction.data).map(d => BinaryData(d)) } else { None },
                     transactionId = AccountTransaction(
@@ -332,6 +359,7 @@ object UnpackedAccountAddress {
 }
 
 case class AccountAddressResponse(address: String,
+                                  initAddress: String,
                                   unpacked: UnpackedAccountAddress)
 
 object AccountAddressResponse {
@@ -409,7 +437,7 @@ object SendGramsRequest {
     implicit val format: Format[SendGramsRequest] = Json.format[SendGramsRequest]
 }
 
-case class SendGramResponse(status: String)
+case class SendGramResponse(hash: String, sentUntil: Long)
 
 object SendGramResponse {
 
@@ -440,6 +468,10 @@ object TransactionHistoryRequest {
 
 case class TransactionHistoryMessage(source: String,
                                      destination: String,
+                                     fwdFee: Long,
+                                     ihrFee: Long,
+                                     bodyHash: String,
+                                     createdLt: Long,
                                      message: Option[BinaryData],
                                      value: Long)
 
@@ -451,6 +483,10 @@ object TransactionHistoryMessage {
         TransactionHistoryMessage(
             source = message.source,
             destination = message.destination,
+            fwdFee = message.fwdFee,
+            ihrFee = message.ihrFee,
+            bodyHash = AccountTransaction.convertBytesToHex(message.bodyHash),
+            createdLt = message.createdLt,
             message = if (withData) { Option(message.message).map(d => BinaryData(d)) } else None,
             value = message.value
         )
@@ -458,6 +494,8 @@ object TransactionHistoryMessage {
 }
 
 case class TransactionHistoryTransaction(fee: Long,
+                                         storageFee: Long,
+                                         otherFee: Long,
                                          timestamp: Long,
                                          data: Option[BinaryData],
                                          transactionId: AccountTransaction,
