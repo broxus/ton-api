@@ -170,21 +170,6 @@ components:
 
   responses:
 
-    NotFound:
-      description: Resource not found
-      content:
-        application/json:
-          schema:
-            type: object
-            description: Error that comes with "404" status
-            properties:
-              code:
-                type: string
-                example: 404
-              description:
-                type: string
-                example: Not found
-
     BadRequest:
       description: Most likely malformed json (this includes violating schema in terms of required fields, but not validations)
       content:
@@ -193,21 +178,15 @@ components:
             type: object
             description: Error that comes with "400" status
             properties:
-              description:
+              code:
+                type: integer
+                description: Error code
+                example: 400
+              message:
                 type: string
-                example: Bad request
+                description: Error message
+                example: INVALID_ACCOUNT_ADDRESS Failed to parse account address
 
-    Unauthorized:
-      description: Unauthorized to perform action
-      content:
-        application/json:
-          schema:
-            type: object
-            description: Error that comes with "403" status
-            properties:
-              description:
-                type: string
-                example: Unauthorized
     Internal:
       description: Internal server error
       content:
@@ -216,9 +195,14 @@ components:
             type: object
             description: Error that comes with "500" status
             properties:
-              description:
+              code:
+                type: integer
+                description: Error code
+                example: -101
+              message:
                 type: string
-                example: Internal server error
+                description: Error message
+                example: Amount value must be greater then zero
 
   schemas:
 
@@ -373,7 +357,17 @@ components:
         fee:
           type: number
           format: int64
-          description: Transaction fee
+          description: Transaction total fee in nanograms
+          example: 0
+        storageFee:
+          type: number
+          format: int64
+          description: Transaction storage fee in nanograms
+          example: 0
+        otherFee:
+          type: number
+          format: int64
+          description: Transaction other fee in nanograms
           example: 0
         timestamp:
           $ref: "#/components/schemas/TimeStamp"
@@ -398,6 +392,25 @@ components:
         message:
           type: string
           description: Base64 encoded message binary data
+        bodyHash:
+          type: string
+          description: Message body hash in hex encoding
+          example: "3FE93897158698E4D473B74414D7493716B0FC3A70310934873F0019DAACCAB4"
+        createdLt:
+          type: number
+          format: int64
+          description: Message creation logical time
+          example: 720309000002
+        fwdFee:
+          type: number
+          format: int64
+          description: Message fee in nanograms
+          example: 0
+        ihrFee:
+          type: number
+          format: int64
+          description: Message fee in nanograms
+          example: 0
         value:
           type: number
           format: int64
@@ -427,11 +440,6 @@ components:
 
     SendGramsRequest:
       properties:
-        sourceAccountType:
-          type: string
-          enum: [ "wallet", "testWallet", "testGiver" ]
-          description: Source account type
-          example: "wallet"
         sourceKey:
           properties:
             publicKey:
@@ -442,10 +450,9 @@ components:
               type: string
               description: Private key password in base64 fromat
               example: "NOhHi4qiDQRHCBtH5jQHAtbJl9wfwFiOSikWq/3vh1o="
-        sourceSequence:
-          type: integer
-          description: Source sequence number
-          example: 1
+        sourceAddress:
+          $ref: '#/components/schemas/PackedAccountAddress'
+          description: Source address
         destinationAddress:
           $ref: '#/components/schemas/PackedAccountAddress'
           description: Target address
@@ -457,7 +464,11 @@ components:
 
     SendGramsResponse:
       properties:
-        status:
+        bodyHash:
           type: string
-          description: Command status
-          example: "OK"
+          description: Input message body hash in hex encoding
+          example: "9D35B94BDDDD43C5AD467F6B7707BCEE59C129B383A14CAB31C8ECE30F3E8277"
+        sentUntil:
+          $ref: '#/components/schemas/TimeStamp'
+          description: Transaction valid until this time
+

@@ -52,8 +52,9 @@ class TonClientGlobal @Inject()(config: TonClientConfig, lifecycle: ApplicationL
             override def onResult(o: TonApi.Object): Unit = {
                 o match {
                     case error: TonApi.Error =>
-                        promise.failure(new RuntimeException(
-                            s"Get an error on ton client request ${error.code} [${error.message}]"
+                        promise.failure(TonClientException(
+                            code = error.code,
+                            message = s"${error.message}"
                         ))
                     case other => promise.success(other)
                 }
@@ -118,3 +119,5 @@ class TonClientGlobal @Inject()(config: TonClientConfig, lifecycle: ApplicationL
 }
 
 case class TonClientConfig(liteClient: String, keystore: String, useNetworkCallback: Boolean, verbosityLevel: Int)
+
+case class TonClientException(code: Int, message: String) extends RuntimeException(message)
