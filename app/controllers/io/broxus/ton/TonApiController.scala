@@ -203,6 +203,19 @@ class TonApiController @Inject()(controllerComponents: ControllerComponents,
                     }
                 )))
 
+            case raw: TonApi.GenericAccountStateRaw =>
+                Ok(Json.toJson(AccountStatusResponse(
+                    balance = raw.accountState.balance,
+                    timestamp = raw.accountState.syncUtime,
+                    accountType = AccountAddressTypes.Raw,
+                    lastTransaction = Option(raw.accountState.lastTransactionId).map { tx =>
+                        AccountTransaction(
+                            hash = AccountTransaction.convertBytesToHex(tx.hash),
+                            lt = tx.lt
+                        )
+                    }
+                )))
+
             case other =>
                 BadRequest(Json.toJson(ResponseError(
                     code = -100,

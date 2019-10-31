@@ -10,6 +10,7 @@ case object AccountAddressTypes {
     val TestWallet = "testWallet"
     val Wallet = "wallet"
     val Giver = "giver"
+    val Raw = "raw"
 }
 
 case class BinaryData(bytes: Array[Byte])
