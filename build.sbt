@@ -8,7 +8,7 @@ organization := "io.broxus"
 
 scalaVersion := "2.12.8"
 
-lazy val `ton-client` = RootProject(uri("git://github.com/broxus/ton-client.git#8808da86ad1239511ebefea692bc80bdec8b111d"))
+lazy val `ton-client` = RootProject(uri("https://github.com/broxus/ton-client.git#8808da86ad1239511ebefea692bc80bdec8b111d"))
 
 lazy val `ton-api` = (project in file("."))
     .enablePlugins(PlayScala)
