@@ -24,7 +24,7 @@ class TonApiController @Inject()(controllerComponents: ControllerComponents,
         )).flatMap {
 
             case key: TonApi.Key =>
-                client.send(new TonApi.ExportKey(new TonApi.InputKey(
+                client.send(new TonApi.ExportKey(new TonApi.InputKeyRegular(
                     key,
                     null
                 ))).map {
@@ -291,7 +291,7 @@ class TonApiController @Inject()(controllerComponents: ControllerComponents,
                 message = s"Source and destination addresses are equals"
             ))))
         } else {
-            val sourceKey = new TonApi.InputKey(
+            val sourceKey = new TonApi.InputKeyRegular(
                 new TonApi.Key(
                     gramRequest.sourceKey.publicKey,
                     gramRequest.sourceKey.password.bytes
@@ -350,13 +350,13 @@ class TonApiController @Inject()(controllerComponents: ControllerComponents,
         val initRequestFuture = initRequest.accountType match {
 
             case AccountAddressTypes.TestWallet =>
-                client.send(new TonApi.TestWalletInit(new TonApi.InputKey(
+                client.send(new TonApi.TestWalletInit(new TonApi.InputKeyRegular(
                     inputKey,
                     null
                 )))
 
             case AccountAddressTypes.Wallet =>
-                client.send(new TonApi.WalletInit(new TonApi.InputKey(
+                client.send(new TonApi.WalletInit(new TonApi.InputKeyRegular(
                     inputKey,
                     null
                 )))

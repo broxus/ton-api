@@ -75,7 +75,7 @@ class TonClientGlobal @Inject()(config: TonClientConfig, lifecycle: ApplicationL
             new TonApi.Options(
                 new TonApi.Config(
                     config.liteClient,
-                    "",
+                    "testnet2",
                     config.useNetworkCallback,
                     false
                 ),
